@@ -12,3 +12,4 @@ class UnsoldspiderItem(scrapy.Item):
     # pass
     house_id = scrapy.Field()
     category = scrapy.Field()
+    region = scrapy.Field()
