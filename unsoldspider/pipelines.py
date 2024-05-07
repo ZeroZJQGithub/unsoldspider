@@ -8,10 +8,13 @@
 from itemadapter import ItemAdapter
 import pymysql
 import logging
+from scrapy.exceptions import DropItem
+
 
 class UnsoldspiderPipeline:
-    def __init__(self) -> None:
-        self.host='192.168.117.128'
+    def __init__(self, spider_category, spider_region) -> None:
+        # self.host='192.168.117.128'
+        self.host='192.168.150.128'
         self.user='root'
         self.password='123456'
         self.database='homue_api'
@@ -19,6 +22,14 @@ class UnsoldspiderPipeline:
 
         self.insert_items = []
         self.item_count = 0
+        self.spider_category = spider_category
+        self.spider_region = spider_region
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.spider.spider_category, 
+                   crawler.spider.spider_region
+                   )
 
     def open_spider(self, spider):
         self.conn = pymysql.connect(
@@ -27,19 +38,32 @@ class UnsoldspiderPipeline:
                 database=self.database, 
                 port=self.port
             )
-
+        sql = f"SELECT house_id FROM all_unsold_houses WHERE category='{self.spider_category}' AND region='{self.spider_region}' ORDER BY house_id DESC LIMIT 1"
+        cursor = self.conn.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        self.max_unsold_house_id = result[0]
+        cursor.close()
+        # self.conn.close()
     def close_spider(self, spider):
-        self.insert_items_to_database(self.insert_items)
-        self.conn.close()
+        # pass
+        if len(self.insert_items) == 0:
+            self.conn.close()
+        else:
+            self.insert_items_to_database(self.insert_items)
+            self.conn.close()
 
     def process_item(self, item, spider):
-        self.insert_items.append((item['house_id'], item['category'], item['region']))
-        self.item_count += 1
+        if item['house_id'] <= self.max_unsold_house_id:
+            raise DropItem(f"Aleardy crawl the house: {item['house_id']}")
+        else:
+            self.insert_items.append((item['house_id'], item['category'], item['region']))
+            self.item_count += 1
 
-        if self.item_count == 100:
-            self.insert_items_to_database(self.insert_items)
-            
-        return item
+            if self.item_count == 100:
+                self.insert_items_to_database(self.insert_items)
+                
+            return item
     
     def insert_items_to_database(self, insert_data):
         logging.info(insert_data)
