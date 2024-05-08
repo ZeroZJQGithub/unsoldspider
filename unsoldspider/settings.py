@@ -95,8 +95,8 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 # Set setting to connect mysql database
-# DB_HOST = "192.168.150.128"
-# DB_USER = "root"
-# DB_PASSWORD = "123456"
-# DB_DATABASE = "homue_api"
-# DB_PORT = 3366
+DB_HOST = "192.168.150.128"
+DB_USER = "root"
+DB_PASSWORD = "123456"
+DB_DATABASE = "homue_api"
+DB_PORT = 3366

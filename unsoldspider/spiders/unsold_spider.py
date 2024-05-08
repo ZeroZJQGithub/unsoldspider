@@ -1,5 +1,6 @@
 import scrapy
 from scrapy import Request
+from scrapy.crawler import Crawler
 from ..items import UnsoldspiderItem
 import logging
 import pymysql
@@ -27,7 +28,6 @@ class UnsoldSpiderSpider(scrapy.Spider):
         self.spider_region = urls[-1].split('?')[0]
 
     def start_requests(self):
-        # spider_start_url = f'{self.root_url}/{self.spider_category}/sale/{self.spider_region}?by=latest'
         yield Request(url=self.spider_url, headers=self.realestate_header, callback=self.parse, meta={'category': self.spider_category, 'region': self.spider_region})
 
     def parse(self, response):
@@ -36,7 +36,8 @@ class UnsoldSpiderSpider(scrapy.Spider):
         region = response.meta['region']
         house_item = UnsoldspiderItem()
         for house in response.css('div.listing-tile'):
-            detail_page_link = house.css("div.tile--body>div.relative a::attr(href)").get()
+            # detail_page_link = house.css("div.tile--body>div.relative a::attr(href)").get()
+            detail_page_link = house.css('div.tile--body>div.relative:last-child>a::attr(href)').get()
             if detail_page_link is not None:
                 house_id = detail_page_link.split("/")[1]
                 house_item['house_id'] = house_id
