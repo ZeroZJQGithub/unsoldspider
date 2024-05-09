@@ -1,9 +1,7 @@
 import scrapy
 from scrapy import Request
-from scrapy.crawler import Crawler
 from ..items import UnsoldspiderItem
 import logging
-import pymysql
 
 class UnsoldSpiderSpider(scrapy.Spider):
     name = "unsold_spider"

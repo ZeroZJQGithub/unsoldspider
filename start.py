@@ -7,8 +7,8 @@ import os
 from datetime import datetime
 import scrapy.utils
 import scrapy.utils.project
-from scrapy.utils.project import get_project_settings
-import pymysql
+# from scrapy.utils.project import get_project_settings
+# import pymysql
 
 root_url = "https://www.realestate.co.nz"
 # nz_regions_size = 21
@@ -19,30 +19,6 @@ house_categories = ['residential', 'commercial', 'rural', 'business']
 region_index = -1
 category_index = -1
 
-def truncate_region_house(category, region):
-    db_settings = get_project_settings()
-    DB_HOST = db_settings.get('DB_HOST')
-    DB_USER = db_settings.get('DB_USER')
-    DB_PASSWORD = db_settings.get('DB_PASSWORD')
-    DB_DATABASE = db_settings.get('DB_DATABASE')
-    DB_PORT = db_settings.get('DB_PORT')
-    conn = pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_DATABASE,
-        port=DB_PORT
-    )
-    try:
-        sql = f"DELETE FROM all_unsold_houses WHERE category='{category}' AND region='{region}'"
-        cursor = conn.cursor()
-        cursor.execute(sql)
-        conn.commit()
-        cursor.close()
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
-    finally:
-        conn.close()
 
 def start_spider():
     global region_index, category_index, nz_regions, house_categories, root_url
@@ -56,14 +32,16 @@ def start_spider():
         url = f'{root_url}/{spider_category}/sale/{spider_region}?by=latest'
         print(f'The current spider url is: {url}')
         os.system("> scrapy.log")
-        truncate_region_house(spider_category, spider_region)
         os.system(f'scrapy crawl unsold_spider -a url={url}')
     else:
-        pass
+        print(f'The current category_index is: {category_index}')
+        print(f'The current region_index is: {region_index}')
+        category_index = -1
+        region_index = -1
 
 if __name__ == '__main__':
     scheduler = BlockingScheduler()
-    trigger = IntervalTrigger(hours=1, start_date=datetime.now())
+    trigger = IntervalTrigger(minutes=30, start_date=datetime.now())
     job = scheduler.add_job(start_spider, trigger)
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     try:
