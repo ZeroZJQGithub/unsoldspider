@@ -10,6 +10,7 @@ import pymysql
 import logging
 from scrapy.exceptions import DropItem
 import sys
+from datetime import datetime
 
 
 class UnsoldspiderPipeline:
@@ -73,15 +74,17 @@ class UnsoldspiderPipeline:
         # if item['house_id'] <= self.max_unsold_house_id:
         #     raise DropItem(f"Aleardy crawl the house: {item['house_id']}")
         # else:
-        self.insert_items.append((item['house_id'], item['category'], item['region']))
+        created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        item['created_at'] = created_at
+        self.insert_items.append((item['house_id'], item['category'], item['region'], item['created_at']))
         self.item_count += 1
-        if self.item_count == 100:
+        if self.item_count == 300:
             self.insert_items_to_database(self.insert_items)           
         return item
     
     def insert_items_to_database(self, insert_data):
         try:
-            sql = "INSERT INTO all_unsold_houses(house_id, category, region) VALUES (%s, %s, %s)"
+            sql = "INSERT INTO all_unsold_houses(house_id, category, region, created_at) VALUES (%s, %s, %s, %s)"
             cursor = self.conn.cursor()
             cursor.executemany(sql, insert_data)
             self.conn.commit()
