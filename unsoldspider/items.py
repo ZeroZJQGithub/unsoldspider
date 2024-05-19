@@ -14,3 +14,4 @@ class UnsoldspiderItem(scrapy.Item):
     category = scrapy.Field()
     region = scrapy.Field()
     created_at = scrapy.Field()
+    updated_at = scrapy.Field()

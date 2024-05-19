@@ -20,7 +20,8 @@ NEWSPIDER_MODULE = "unsoldspider.spiders"
 ROBOTSTXT_OBEY = True
 
 LOG_FILE='./scrapy.log'
-LOG_LEVEL='ERROR'
+# LOG_LEVEL='ERROR'
+LOG_LEVEL='INFO'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

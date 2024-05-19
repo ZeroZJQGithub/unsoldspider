@@ -43,7 +43,7 @@ def start_spider():
 if __name__ == '__main__':
     scheduler = BlockingScheduler()
     trigger = IntervalTrigger(minutes=10, start_date=datetime.now())
-    job = scheduler.add_job(start_spider, trigger, max_instances=5)
+    job = scheduler.add_job(start_spider, trigger, max_instances=4)
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     try:
         scheduler.start()
