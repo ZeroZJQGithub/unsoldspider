@@ -17,6 +17,38 @@ nz_regions = ['auckland', 'canterbury', 'waikato', 'bay-of-plenty', 'northland',
 # nz_regions = ['pacific-islands', 'gisborne']
 house_categories = ['residential', 'commercial', 'rural', 'business']
 
+spider_urls = [
+    'residential/sale/auckland/auckland-city',
+    'residential/sale/auckland/manukau-city',
+    'residential/sale/auckland/waitakere-city',
+    'residential/sale/auckland/rodney',
+    'residential/sale/auckland/north-shore-city',
+    'residential/sale/auckland/franklin',
+    'residential/sale/auckland/papakura',
+    'residential/sale/auckland/waiheke-island',
+    'residential/sale/auckland/hauraki-gulf-islands',
+    'residential/sale/canterbury',
+    'residential/sale/waikato',
+    'residential/sale/bay-of-plenty',
+    'residential/sale/northland',
+    'residential/sale/wellington',
+    'residential/sale/manawatu-whanganui',
+    'residential/sale/otago',
+    'residential/sale/central-otago-lakes-district',
+    'residential/sale/hawkes-bay',
+    'residential/sale/taranaki',
+    'residential/sale/coromandel',
+    'residential/sale/nelson-bays',
+    'residential/sale/southland',
+    'residential/sale/central-north-island',
+    'residential/sale/wairarapa',
+    'residential/sale/marlborough',
+    'residential/sale/west-coast',
+    'residential/sale/pacific-islands',
+    'residential/sale/gisborne',
+    'residential/sale/confidential',
+]
+
 region_index = -1
 category_index = -1
 
@@ -32,8 +64,12 @@ def start_spider():
         spider_region = nz_regions[region_index]
         url = f'{root_url}/{spider_category}/sale/{spider_region}?by=latest'
         print(f'The current spider url is: {url}')
-        os.system("> scrapy.log")
-        os.system(f'scrapy crawl unsold_spider -a url={url}')
+        if sys.platform.startswith('win32'):
+            os.system("type nul > scrapy.log")
+            os.system(f'python -m scrapy crawl unsold_spider -a url={url}')
+        else:
+            os.system("> scrapy.log")
+            os.system(f'scrapy crawl unsold_spider -a url={url}')
     else:
         print(f'The current category_index is: {category_index}')
         print(f'The current region_index is: {region_index}')
