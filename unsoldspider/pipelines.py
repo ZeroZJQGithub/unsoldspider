@@ -55,7 +55,6 @@ class UnsoldspiderPipeline:
                 port=self.db_settings.get('DB_PORT')
             )
 
-        # self.truncate_region_house(self.spider_category, self.spider_region)
         self.update_scrapy_status(self.spider_category, self.spider_region, 'updating')
 
     def close_spider(self, spider):
@@ -94,25 +93,18 @@ class UnsoldspiderPipeline:
         except:
             print("Insert Into Database Unexpected error:", sys.exc_info()[0])
 
-    def truncate_region_house(self, category, region):
-        try:
-            sql = f"DELETE FROM all_unsold_houses WHERE category='{category}' AND region='{region}'"
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-            self.conn.commit()
-            cursor.close()
-        except:
-            print("Truncate Database Unexpected error:", sys.exc_info()[0])
-
     def update_scrapy_status(self, category, region, status):
         try:
             created_at = datetime.now(tz=self.nz_tz).strftime('%Y-%m-%d %H:%M:%S')
             cursor = self.conn.cursor()
             if status == 'updating':
-                sql = "INSERT INTO unsold_house_update_status(category, region, update_status, created_at) VALUES (%s, %s, %s, %s)"
+                sql = "INSERT IGNORE INTO unsold_house_update_status(category, region, update_status, created_at) VALUES (%s, %s, %s, %s)"
                 cursor.execute(sql, (category, region, 1, created_at))
             else:
-                sql = f"UPDATE unsold_house_update_status JOIN (SELECT MAX(id) as max_id FROM unsold_house_update_status WHERE category='{category}' AND region='{region}') as b ON unsold_house_update_status.id=b.max_id SET update_status=2, updated_at='{created_at}'"
+                sql = f"UPDATE unsold_house_update_status SET update_status=2, updated_at='{created_at}' WHERE category='{category}' AND update_status=1"
+                if region is not None:
+                    sql = f"UPDATE unsold_house_update_status SET update_status=2, updated_at='{created_at}' WHERE category='{category}' AND update_status=1 AND region='{region}'"
+                # sql = f"UPDATE unsold_house_update_status JOIN (SELECT MAX(id) as max_id FROM unsold_house_update_status WHERE category='{category}' AND region='{region}') as b ON unsold_house_update_status.id=b.max_id SET update_status=2, updated_at='{created_at}'"
                 logging.info(sql)
                 cursor.execute(sql)
             self.conn.commit()

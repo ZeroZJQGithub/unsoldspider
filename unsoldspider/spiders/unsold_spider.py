@@ -23,7 +23,10 @@ class UnsoldSpiderSpider(scrapy.Spider):
         self.spider_url = url
         urls = url.split('/')
         self.spider_category = urls[3]
-        self.spider_region = urls[-1].split('?')[0]
+        if len(urls) <= 5:
+            self.spider_region = None
+        else:
+            self.spider_region = urls[-1].split('?')[0]
 
     def start_requests(self):
         yield Request(url=self.spider_url, headers=self.realestate_header, callback=self.parse, meta={'category': self.spider_category, 'region': self.spider_region})
@@ -47,7 +50,8 @@ class UnsoldSpiderSpider(scrapy.Spider):
         
         if next_page is not None:
             self.latest_request_page = self.latest_request_page + 1
-            next_page_url = f'{self.root_url}/{category}/sale/{region}?by=latest&page={self.latest_request_page}'
+            # next_page_url = f'{self.root_url}/{category}/sale/{region}?by=latest&page={self.latest_request_page}'
+            next_page_url = f'{self.spider_url}&page={self.latest_request_page}'
             logging.info(next_page_url)
             yield Request(url=next_page_url, headers=self.realestate_header, callback=self.parse, meta={'category': category, 'region': region})
 
