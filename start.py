@@ -63,20 +63,13 @@ def start_spider():
     # print(f'The current category_index is: {region_index}')
     url = f'{root_url}/{spider_urls[region_index]}?by=latest'
     print(f'The current spider url is: {url}')
-    # urls = url.split('/')
-    # spider_category = urls[3]
-    # spider_region = None
-    # if len(urls) <= 5:
-    #     spider_region = None
-    # else:
-    #     spider_region = urls[-1].split('?')[0]
-    # print(f"spider_category: {spider_category}; spider_region: {spider_region}")
     if sys.platform.startswith('win32'):
         os.system("type nul > scrapy.log")
         os.system(f'python -m scrapy crawl unsold_spider -a url={url}')
     else:
         os.system("> scrapy.log")
         os.system(f'scrapy crawl unsold_spider -a url={url}')
+    
     # region_index = (region_index + 1) % 21
     # if region_index == 0:
     #     category_index  = category_index + 1
@@ -99,7 +92,7 @@ def start_spider():
 
 if __name__ == '__main__':
     scheduler = BlockingScheduler()
-    trigger = IntervalTrigger(minutes=8, start_date=datetime.now())
+    trigger = IntervalTrigger(minutes=15, start_date=datetime.now())
     job = scheduler.add_job(start_spider, trigger, max_instances=4)
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     try:

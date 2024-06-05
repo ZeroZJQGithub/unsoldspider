@@ -23,18 +23,24 @@ class UnsoldSpiderSpider(scrapy.Spider):
         self.spider_url = url
         urls = url.split('/')
         self.spider_category = urls[3]
-        if len(urls) <= 5:
+        if len(urls) >= 7:
+            self.spider_region = urls[5]
+            self.city_name = urls[-1].split('?')[0]
+        elif len(urls) <= 5:
             self.spider_region = None
+            self.city_name = None
         else:
             self.spider_region = urls[-1].split('?')[0]
-
+            self.city_name = None
+        logging.info(f"Length: {len(urls)}, {self.spider_region}, {self.city_name}")
     def start_requests(self):
-        yield Request(url=self.spider_url, headers=self.realestate_header, callback=self.parse, meta={'category': self.spider_category, 'region': self.spider_region})
+        yield Request(url=self.spider_url, headers=self.realestate_header, callback=self.parse, meta={'category': self.spider_category, 'region': self.spider_region, 'city_name': self.city_name})
 
     def parse(self, response):
         # pass
         category = response.meta['category']
         region = response.meta['region']
+        city_name = response.meta['city_name']
         house_item = UnsoldspiderItem()
         for house in response.css('div.listing-tile'):
             # detail_page_link = house.css("div.tile--body>div.relative a::attr(href)").get()
@@ -44,6 +50,7 @@ class UnsoldSpiderSpider(scrapy.Spider):
                 house_item['house_id'] = house_id
                 house_item['category'] = category
                 house_item['region'] = region
+                house_item['city_name'] = city_name
                 yield house_item
 
         next_page = response.css('div.paginated-items>div.paginated-items__control:last-child a').get()
@@ -53,5 +60,5 @@ class UnsoldSpiderSpider(scrapy.Spider):
             # next_page_url = f'{self.root_url}/{category}/sale/{region}?by=latest&page={self.latest_request_page}'
             next_page_url = f'{self.spider_url}&page={self.latest_request_page}'
             logging.info(next_page_url)
-            yield Request(url=next_page_url, headers=self.realestate_header, callback=self.parse, meta={'category': category, 'region': region})
+            yield Request(url=next_page_url, headers=self.realestate_header, callback=self.parse, meta={'category': category, 'region': region, 'city_name': city_name})
 
