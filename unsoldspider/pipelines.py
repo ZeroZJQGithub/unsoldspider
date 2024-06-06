@@ -16,13 +16,6 @@ from dateutil import tz
 
 class UnsoldspiderPipeline:
     def __init__(self, spider_category, spider_region, city_name, db_settings=None) -> None:
-        # self.host='192.168.117.128'
-        # self.host='192.168.150.128'
-        # self.user='root'
-        # self.password='123456'
-        # self.database='homue_api'
-        # self.port=3366
-
         self.insert_items = []
         self.item_count = 0
         self.spider_category = spider_category
